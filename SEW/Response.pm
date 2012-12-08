@@ -54,7 +54,7 @@ sub outputHeaders {
 	
 }
 
-sub send {
+sub send { 
 	my $self = shift @_;
 	my $message = shift @_;
 	my $payload = shift @_;
