@@ -119,9 +119,9 @@ sub exposedAction {
 }
 
 sub action {
-  my $self = shift @_;
-  my $action = shift @_;
-  my $params = shift @_;
+	my $self = shift @_;
+	my $action = shift @_;
+	my $params = shift @_;
   
 	$action =~ s/-/_/gi;
 	
@@ -133,21 +133,21 @@ sub action {
 	if ($self->can($action)) {
 		if ($self->exposedAction($action)) {
 			$self->init();
-			$self->$action(@{$params->{numerical}});
+			#$self->$action(@{$params->{numerical}});
 		} else {
 			$self->error("Unexposed action: $action");
 		}
-  } else {
-    $self->error("Unimplemented action: $action");
-  }
+	} else {
+		$self->error("Unimplemented action: $action");
+	}
 }
 	
 
 sub dispatch {
-  my $self = shift @_;	
+	my $self = shift @_;	
 	my $controller = $self->getController($self->req->controller_name());
   
-  $controller->action($self->req->action(), $self->req->{params});
+	$controller->action($self->req->action(), $self->req->{params});
 } # dispatch()
 
 
