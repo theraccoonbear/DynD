@@ -1,11 +1,20 @@
 package SEW::Request;
 
 use MooseX::Singleton;
-#with 'SEW::Common';
 with 'SEW::Core';
 
 use Data::Dumper;
 use JSON::XS;
+use CGI;
+use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
+
+has 'q' => (
+	is => 'rw',
+	isa => 'CGI',
+	default => sub {
+		return CGI->new();
+	}
+);
 
 has 'controller_name' => (
 	is => 'rw',
@@ -38,7 +47,9 @@ sub BUILD {
 sub _loadParameters {
 	my $self = shift @_;
 	
-	$self->dump($self->q);exit;
+	if (! defined $self->q) {
+		$self->q(CGI->new());
+	}
 	
 	my $post_str = $self->q->param('request') || '{}';
 	my $posted = decode_json($post_str);
@@ -56,10 +67,10 @@ sub _loadParameters {
 		      $self->error("You're giving me nothin' here: " . join('/', @path_parts));
 	}
 	      
-	#	if ($p_cnt >= 1) {
-	#		$self->model($self->utoc($path_parts[0]));
-	#  }
-	#  
+		if ($p_cnt >= 1) {
+			$self->controller_name($self->utoc($path_parts[0]));
+	  }
+	  
 	if ($p_cnt >= 2) {
 		      $self->action($path_parts[1]);
 		      my @prms = @path_parts[2 .. scalar @path_parts - 1];

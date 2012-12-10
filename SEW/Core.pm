@@ -3,16 +3,7 @@ package SEW::Core;
 use Moose::Role;
 
 use Data::Dumper;
-use CGI;
-use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
 
-has 'q' => (
-	is => 'rw',
-	isa => 'CGI',
-	default => sub {
-		return CGI->new();
-	}
-);
 
 has 'context' => (
 	is => 'rw',

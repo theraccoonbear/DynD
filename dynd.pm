@@ -312,9 +312,10 @@ sub validPass {
 	my $self = shift @_;
 	my $domain = shift @_;
 	my $subd = shift @_;
-	my $pass = shift @_;
+	my $hashed_pass = sha1_hex((shift @_) . $self->salt);
 	
 	my $drec = $self->getDomain($domain);
+	
 	if (scalar @{$drec} < 1) { return undef; };
 	my $record = undef;
 	
@@ -326,7 +327,7 @@ sub validPass {
 	}
 	
 	if (! defined $record) { return undef; }
-	return sha1_hex($pass) eq $record->{pass};
+	return $hashed_pass eq $record->{pass};
 }
 
 1;

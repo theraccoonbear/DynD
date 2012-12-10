@@ -1,16 +1,21 @@
 package SEW::Controller;
 
 use Moose;
-#with 'SEW::Core';
 with 'SEW::Common';
 
+use Data::Dumper;
 use JSON::XS;
+
 
 has 'exposed' => (
 	is => 'ro',
 	isa => 'ArrayRef',
 	default => sub { return []; }
 );
+
+sub setup {
+	# ...
+}
 
 sub getController {
 	my $self = shift @_;
@@ -28,8 +33,9 @@ sub getController {
 	my $fq_class_name = "SEW::Controller::$controller";
 	my $controller_path = "$tfp/Controller/$controller.pm";
 	
-	my $ci = {};
+	#$self->dump({cn=>$fq_class_name,path=>$controller_path});
 	
+	my $ci = {};
 	
 	if (-f $controller_path) {
 		require $controller_path;
@@ -49,8 +55,8 @@ sub getController {
 
 sub init {
 	my $self = shift @_;
-	
-	my $post_str = $self->q->param('request') || '{}';
+
+	my $post_str = $self->req->q->param('request') || '{}';
 	
 	my $posted = decode_json($post_str);
 	
@@ -62,7 +68,7 @@ sub init {
 	
 	
 	
-	my @path_parts = split(/\//, $self->q->url_param('path') || '');
+	my @path_parts = split(/\//, $self->req->q->url_param('path') || '');
 	
 	my $p_cnt = scalar @path_parts;
 	
@@ -75,7 +81,7 @@ sub init {
 	#  }
 	
 	if ($p_cnt >= 2) {
-		$self->action($path_parts[1]);
+		$self->req->action($path_parts[1]);
 		my @prms = @path_parts[2 .. scalar @path_parts - 1];
 		
 		
@@ -117,7 +123,7 @@ sub exposedAction {
 	return 0;
 }
 
-sub action {
+sub doAction {
 	my $self = shift @_;
 	my $action = shift @_;
 	my $params = shift @_;
@@ -129,17 +135,18 @@ sub action {
 		$self->error("Invalid action: $action");
 	}
 	
+	
+	
 	if ($self->can($action)) {
 		if ($self->exposedAction($action)) {
-			
-			$self->dump({a=>$action,p=>$params});
 			$self->setup();
-			$self->$action(@{$params->{numerical}});
+			$self->$action($params);
 		} else {
 			$self->error("Unexposed action: $action");
 		}
 	} else {
-		$self->error("Unimplemented action: $action");
+		$self->error("Unimplemented action: $action", Dumper($self));
+		#$self->dump($self);
 	}
 }
 	
@@ -147,12 +154,12 @@ sub action {
 sub dispatch {
 	my $self = shift @_;
 	
-	$self->dump($self->req);
+	$self->init();
 	
 	my $controller = $self->getController($self->req->controller_name());
 	
   
-	$controller->action($self->req->action(), $self->req->{params});
+	$controller->doAction($self->req->action(), $self->req->parameters);
 } # dispatch()
 
 

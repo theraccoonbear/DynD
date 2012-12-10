@@ -4,13 +4,14 @@ use Moose::Role;
 use lib('..');
 use SEW::Request;
 use SEW::Response;
-use SEW::Common;
+use Data::Dumper;
 use Cwd qw(abs_path cwd);
 
 has 'resp' => (
 	is => 'rw',
 	isa => 'SEW::Response',
 	default => sub {
+		print "RESP!";
 		return SEW::Response->instance();
 	}
 );
@@ -40,6 +41,16 @@ sub error {
 	
 	$self->resp->sendError($msg, $data);
 }
+
+sub send {
+	my $self = shift @_;
+	my $msg = shift @_;
+	my $data = shift @_;
+	my $success = shift @_;
+	
+	$self->resp->send($msg, $data, $success);
+}
+
 
 sub dump {
 	my $self = shift @_;
