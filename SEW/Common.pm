@@ -60,4 +60,21 @@ sub dump {
 	exit;
 }
 
+sub stackTrace {
+	my $self = shift @_;
+	
+	my $max_depth = 30;
+	my $i = 1;
+	my $stack = [];
+	
+	
+	my $cnt = 0;
+	while ((my @call_details = (caller($i++))) && ($i<$max_depth)) {
+		$cnt++;
+		push @{$stack}, "$cnt) $call_details[1] line $call_details[2] in function $call_details[3]";
+	}
+	
+	return $stack;
+}
+
 1;
