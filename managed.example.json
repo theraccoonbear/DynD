@@ -1,0 +1,12 @@
+[
+ {
+	"base":"bhffc.com", // Domain name for all sub domains
+	"subs":[
+					{
+						"pass":"9cd5125a80f94be4c374c1cc6c1dcac19a40e647", // SHA1 pass + salt
+						"subdomain":"xyz" // Subdomain portion
+					}
+				],
+	"notifications":"dynd@hooray.33mail.com" // Who gets update notices
+	}
+]
