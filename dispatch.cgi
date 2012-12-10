@@ -6,8 +6,6 @@ use SEW::Controller;
 
 my $controller = new SEW::Controller();
 
-$controller->send($^X);
-
 eval {
 	$controller->dispatch();
 };
