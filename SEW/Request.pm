@@ -3,6 +3,8 @@ package SEW::Request;
 use MooseX::Singleton;
 with 'SEW::Core';
 
+use SEW::Response;
+
 use Data::Dumper;
 use JSON::XS;
 use CGI;
@@ -37,6 +39,15 @@ has 'parameters' => (
 	#}
 );
 
+has 'resp' => (
+	is => 'rw',
+	isa => 'SEW::Response',
+	default => sub {
+		return SEW::Response->instance();
+	}
+);
+
+
 sub BUILD {
 	my $self = shift;
 	$self->dump("HERE!?");
@@ -64,12 +75,16 @@ sub _loadParameters {
 	my $p_cnt = scalar @path_parts;
 	
 	if ($p_cnt == 0) {
-		      $self->error("You're giving me nothin' here: " . join('/', @path_parts));
+		$self->error("You're giving me nothin' here: " . join('/', @path_parts));
 	}
 	      
-		if ($p_cnt >= 1) {
-			$self->controller_name($self->utoc($path_parts[0]));
-	  }
+	if ($path_parts[0] =~ m/[^A-Za-z_]/gi) {
+		$self->error("Invalid controller name: \"$path_parts[0]\"");
+	}
+				
+	if ($p_cnt >= 1) {
+		$self->controller_name($self->utoc($path_parts[0]));
+	}
 	  
 	if ($p_cnt >= 2) {
 		      $self->action($path_parts[1]);
@@ -113,7 +128,14 @@ sub _findController {
 sub getParam {
 	my $self = shift @_;
 	my $key = shift @_;
+}
+
+sub error {
+	my $self = shift @_;
+	my $msg = shift @_;
+	my $data = shift @_;
 	
+	$self->resp->sendError($msg, $data);
 }
 
 1;

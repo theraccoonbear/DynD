@@ -11,7 +11,6 @@ has 'resp' => (
 	is => 'rw',
 	isa => 'SEW::Response',
 	default => sub {
-		print "RESP!";
 		return SEW::Response->instance();
 	}
 );
