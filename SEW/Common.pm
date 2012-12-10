@@ -1,14 +1,25 @@
 package SEW::Common;
 
 use Moose::Role;
+use lib('..');
+use SEW::Request;
 use SEW::Response;
+use SEW::Common;
 use Cwd qw(abs_path cwd);
 
-has 'respObj' => (
+has 'resp' => (
 	is => 'rw',
 	isa => 'SEW::Response',
 	default => sub {
 		return SEW::Response->instance();
+	}
+);
+
+has 'req' => (
+	is => 'rw',
+	isa => 'SEW::Request',
+	default => sub {
+		return SEW::Request->instance();
 	}
 );
 
@@ -27,7 +38,16 @@ sub error {
 	my $msg = shift @_;
 	my $data = shift @_;
 	
-	$self->respObj->sendError($msg, $data);
+	$self->resp->sendError($msg, $data);
+}
+
+sub dump {
+	my $self = shift @_;
+	my $dat = shift @_;
+	print "Content-Type: text/plain\n\n";
+	print "DUMP:\n";
+	print Dumper($dat);
+	exit;
 }
 
 1;

@@ -12,9 +12,15 @@ has 'exposed' => (
 	default => sub { return ['index','test']; }
 );
 
+sub setup {
+	my $self = shift @_;
+	
+}
+
 sub test {
 	my $self = shift @_;
-	$self->error("Test!", {});
+	my $params = shift @_;
+	$self->error("Test!", {params => $params});
 }
 
 sub index {

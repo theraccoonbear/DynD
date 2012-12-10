@@ -1,7 +1,7 @@
 package SEW::Response;
 
 use MooseX::Singleton;
-with 'SEW::Common';
+#with 'SEW::Common';
 with 'SEW::Core';
 
 use Data::Dumper;

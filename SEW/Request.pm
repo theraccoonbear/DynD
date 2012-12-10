@@ -1,7 +1,7 @@
 package SEW::Request;
 
 use MooseX::Singleton;
-with 'SEW::Common';
+#with 'SEW::Common';
 with 'SEW::Core';
 
 use Data::Dumper;
@@ -22,20 +22,23 @@ has 'action' => (
 has 'parameters' => (
 	is => 'rw',
 	isa =>'HashRef',
-	default => sub {
-		return {named=>{},numerical=>[],posted=>{}};
-	}
+	builder => '_loadParameters'
+	#default => sub {
+	#	return {named=>{},numerical=>[],posted=>{}};
+	#}
 );
 
 sub BUILD {
 	my $self = shift;
-	
+	$self->dump("HERE!?");
 	$self->parameters($self->_loadParameters());
 	$self->controller_name($self->_findController());
 }
 
 sub _loadParameters {
 	my $self = shift @_;
+	
+	$self->dump($self->q);exit;
 	
 	my $post_str = $self->q->param('request') || '{}';
 	my $posted = decode_json($post_str);
@@ -45,37 +48,39 @@ sub _loadParameters {
 		'posted' => $posted
 	};
 	
-  my @path_parts = split(/\//, $self->q->url_param('path') || '');
+	my @path_parts = split(/\//, $self->q->url_param('path') || '');
+	      
+	my $p_cnt = scalar @path_parts;
 	
-  my $p_cnt = scalar @path_parts;
-  
-  if ($p_cnt == 0) {
-		$self->error("You're giving me nothin' here: " . join('/', @path_parts));
-  }
-	
-#	if ($p_cnt >= 1) {
-#		$self->model($self->utoc($path_parts[0]));
-#  }
-#  
-  if ($p_cnt >= 2) {
-		$self->action($path_parts[1]);
-		my @prms = @path_parts[2 .. scalar @path_parts - 1];
-		
-		
-		foreach my $p (@prms) {
-			my $pn = '';
-			my $pv = $p;
-			if ($p =~ m/^([a-zA-Z_-]+):(.+?)$/) {
-				$pn = $1;
-				$pv = $2;
-				$params->{named}->{$pn} = $pv;
-			}
-			
-			push @{$params->{numerical}}, $pv;
-		}
-  }
+	if ($p_cnt == 0) {
+		      $self->error("You're giving me nothin' here: " . join('/', @path_parts));
+	}
+	      
+	#	if ($p_cnt >= 1) {
+	#		$self->model($self->utoc($path_parts[0]));
+	#  }
+	#  
+	if ($p_cnt >= 2) {
+		      $self->action($path_parts[1]);
+		      my @prms = @path_parts[2 .. scalar @path_parts - 1];
+		      
+		      
+		      foreach my $p (@prms) {
+			      my $pn = '';
+			      my $pv = $p;
+			      if ($p =~ m/^([a-zA-Z_-]+):(.+?)$/) {
+				      $pn = $1;
+				      $pv = $2;
+				      $params->{named}->{$pn} = $pv;
+			      }
+			      
+			      push @{$params->{numerical}}, $pv;
+		      }
+	}
+	$self->dump($params);
 	
 	return $params;
+	
 }
 
 sub _findController {
