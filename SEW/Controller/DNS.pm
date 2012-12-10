@@ -32,7 +32,12 @@ sub update {
 	
 	if ($self->dns->validPass($base, $subd, $pass)) {
 		my $cur_ip = $self->dns->currentIP($subd . '.' . $base);
-		$self->send($cur_ip);
+		$self->dns->updateRecord($base, $subd, $cur_ip, $new_ip);
+		if ($self->dns->anyFatals) {
+			$self->error("Update failed", $self->dns->event_log);
+		} else {
+			$self->send("Success!",{success=>JSON::XS::true});
+		}
 	} else {
 		$self->error('bad pass');
 	}

@@ -134,10 +134,11 @@ sub updateRecord {
 	my $new_ip = shift @_;
 	
 	if (! $self->logged_in) {
-		$self->login();
+		my $suc = $self->login();
+		if (!$suc) { return undef; }
 	}
 	
-	$self->manageDomain({
+	return $self->manageDomain({
 		base => $base_domain,
 		subdomain => $subdomain,
 		new_ip => $new_ip,
@@ -150,18 +151,6 @@ sub hashPass {
 	my $pass = shift @_;
 	return sha1_hex($pass . $self->salt);
 }
-
-#sub log_Msg {
-#	my $self = shift @_;
-#	my $msg = shift @_;
-#	my $type = shift @_ || 'stat';
-#	
-#	print STDERR "[$type] $msg\n";
-#	
-#	if ($type eq 'error') {
-#		exit 1;
-#	}
-#}
 
 sub getBaseDomain {
 	my $self = shift @_;
@@ -294,8 +283,7 @@ sub manageDomain {
 	
 	$self->mech->post($api_url, $req);
 	if (!$self->mech->success) {
-		$self->logFatal("Load error", {api_url=>$api_url,req=>$req});
-		return undef;
+		return $self->logFatal("Load error", {api_url=>$api_url,req=>$req});
 	}
 	
 	my $json = $self->mech->{content};
@@ -304,7 +292,7 @@ sub manageDomain {
 	if ($obj->{result} == 1) {
 		$self->logMsg("Records updated, $opts->{subdomain}.$opts->{base} now points at $opts->{new_ip}");
 	} else {
-		$self->logWarning('Something went wrong', {obj=>$obj});
+		$self->logFatal('Something went wrong', {obj=>$obj});
 	}
 }
 
@@ -376,6 +364,17 @@ sub logMsg {
 	my $meta = shift @_;
 	
 	push @{$self->event_log}, {message=>$msg,meta=>$meta,type=>'status'};
+}
+
+sub anyFatals {
+	my $self = shift @_;
+	foreach my $event (@{$self->event_log}) {
+		if ($event->{type} eq 'fatal') {
+			return 1;
+		}
+	}
+	
+	return 0;
 }
 
 
