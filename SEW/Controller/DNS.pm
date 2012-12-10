@@ -31,7 +31,8 @@ sub update {
 	my $new_ip = $params->{named}->{new_ip} || $self->error("No IP provided", {new_ip=>undef});
 	
 	if ($self->dns->validPass($base, $subd, $pass)) {
-		$self->send("Hooray!");
+		my $cur_ip = $self->dns->currentIP($subd . '.' . $base);
+		$self->send($cur_ip);
 	} else {
 		$self->error('bad pass');
 	}

@@ -9,7 +9,7 @@ extends 'SEW::Controller';
 has 'exposed' => (
 	is => 'ro',
 	isa => 'ArrayRef',
-	default => sub { return ['index','test']; }
+	default => sub { return ['test']; }
 );
 
 sub setup {

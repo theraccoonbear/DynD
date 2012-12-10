@@ -57,7 +57,7 @@ sub outputHeaders {
 sub send { 
 	my $self = shift @_;
 	my $message = shift @_;
-	my $payload = shift @_;
+	my $payload = shift @_ || {};
 	my $success = shift @_;
 	
 	$success = $success || ! defined $success ? JSON::XS::true : JSON::XS::false;

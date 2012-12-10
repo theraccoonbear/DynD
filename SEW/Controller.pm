@@ -22,7 +22,8 @@ sub getController {
 	my $controller = shift @_;
 	
 	if ($controller =~ m/[^A-Za-z_]/gi) {
-		$self->error("Invalid controller name: $controller");
+		$controller = 'Default';
+		#$self->error("Invalid controller name: $controller");
 	}
 	
 	
@@ -145,7 +146,7 @@ sub doAction {
 			$self->error("Unexposed action: $action");
 		}
 	} else {
-		$self->error("Unimplemented action: $action", Dumper($self));
+		$self->error("Unimplemented action: $action"); #, Dumper($self));
 		#$self->dump($self);
 	}
 }

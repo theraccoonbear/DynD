@@ -79,7 +79,8 @@ sub _loadParameters {
 	}
 	      
 	if ($path_parts[0] =~ m/[^A-Za-z_]/gi) {
-		$self->error("Invalid controller name: \"$path_parts[0]\"");
+		$path_parts[0] = 'Default';
+		#$self->error("Invalid controller name: \"$path_parts[0]\"");
 	}
 				
 	if ($p_cnt >= 1) {

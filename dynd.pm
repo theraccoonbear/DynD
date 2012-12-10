@@ -80,6 +80,14 @@ has 'salt' => (
 	default => 'DynD-SALT-29103801wmdio12'
 );
 
+has 'event_log' => (
+	is => 'rw',
+	isa => 'ArrayRef',
+	default => sub {
+		return [];
+	}
+);
+
 sub _loadConfig {
 	my $self = shift @_;
 	
@@ -143,17 +151,17 @@ sub hashPass {
 	return sha1_hex($pass . $self->salt);
 }
 
-sub logMsg {
-	my $self = shift @_;
-	my $msg = shift @_;
-	my $type = shift @_ || 'stat';
-	
-	print STDERR "[$type] $msg\n";
-	
-	if ($type eq 'error') {
-		exit 1;
-	}
-}
+#sub log_Msg {
+#	my $self = shift @_;
+#	my $msg = shift @_;
+#	my $type = shift @_ || 'stat';
+#	
+#	print STDERR "[$type] $msg\n";
+#	
+#	if ($type eq 'error') {
+#		exit 1;
+#	}
+#}
 
 sub getBaseDomain {
 	my $self = shift @_;
@@ -192,7 +200,9 @@ sub login {
 			'lpass' => $self->config->{password},
 		},
 	);
-	$self->logMsg("Load error", 'error') unless ($self->mech->success);
+	if (!$self->mech->success) {
+		return $self->logFatal("Load error", 'error');
+	}
 	
 	$self->mech->submit_form(form_number => 1);
 	
@@ -206,11 +216,15 @@ sub openDomainManager {
 	
 	$self->logMsg("Opening domain manager...");
 	$self->mech->get('https://host414.hostmonster.com:2083/frontend/dm.cgi?step=dm');
-	$self->logMsg("Load error", 'error') unless ($self->mech->success);
+	if ($self->mech->success) {
+		return $self->logFatal("Load error");
+	}
 	$self->logMsg("OK. Loading account...");
 	
 	$self->mech->get('https://my.hostmonster.com/cgi/account/dm?ldomain=theracco');
-	$self->logMsg("Load error", 'error') unless ($self->mech->success);
+	if ($self->mech->success) {
+		return $self->logFatal("Load error");
+	}
 	$self->logMsg("OK. Retrieving current DNS config...");
 	
 	my $state_url = 'https://my.hostmonster.com/cgi/dm/zoneedit/ajax';
@@ -222,7 +236,9 @@ sub openDomainManager {
 	
 	$self->mech->post($state_url, $req);
 	
-	$self->logMsg("Load error", 'error') unless ($self->mech->success);
+	if ($self->mech->success) {
+		return $self->logFatal("Load error");
+	}
 	
 	my $json = $self->mech->{content};
 	my $obj = decode_json($json);
@@ -236,7 +252,7 @@ sub openDomainManager {
 	}
 	
 	if (! defined $dns_rec) {
-		$self->logMsg("Couldn't find record; exiting.", 'error');
+		return $self->logFatal("Couldn't find record");
 	}
 	
 	return $dns_rec;
@@ -252,11 +268,14 @@ sub manageDomain {
 	
 	$self->logMsg("Updating DNS records...");
 	$self->mech->get($dmgr);
-	$self->logMsg("Load error", 'error') unless ($self->mech->success);
+	if (!$self->mech->success) {
+		$self->logFatal("Load error", {dmgr=>$dmgr});
+		return undef;
+	}
 	
 	my $content = $self->mech->{content};
 	
-	$self->logMsg("OK.  Locating subdomain...");
+	$self->logMsg("Locating subdomain...");
 	
 	my $api_url = 'https://my.hostmonster.com/cgi/dm/zoneedit/ajax';
 	
@@ -274,15 +293,18 @@ sub manageDomain {
 	};
 	
 	$self->mech->post($api_url, $req);
-	$self->logMsg("Load error", 'error') unless ($self->mech->success);
+	if (!$self->mech->success) {
+		$self->logFatal("Load error", {api_url=>$api_url,req=>$req});
+		return undef;
+	}
 	
 	my $json = $self->mech->{content};
 	my $obj = decode_json($json);
 	
 	if ($obj->{result} == 1) {
-		$self->logMsg("Records updated: $opts->{subdomain}.$opts->{base} now points at $opts->{new_ip}");
+		$self->logMsg("Records updated, $opts->{subdomain}.$opts->{base} now points at $opts->{new_ip}");
 	} else {
-		$self->logMsg("Something went wrong!", 'error');
+		$self->logWarning('Something went wrong', {obj=>$obj});
 	}
 }
 
@@ -329,5 +351,32 @@ sub validPass {
 	if (! defined $record) { return undef; }
 	return $hashed_pass eq $record->{pass};
 }
+
+sub logFatal {
+	my $self = shift @_;
+	my $msg = shift @_;
+	my $meta = shift @_;
+	
+	push @{$self->event_log}, {message=>$msg,meta=>$meta,type=>'fatal'};
+	
+	return undef;
+}
+
+sub logWarning {
+	my $self = shift @_;
+	my $msg = shift @_;
+	my $meta = shift @_;
+	
+	push @{$self->event_log}, {message=>$msg,meta=>$meta,type=>'warning'};
+}
+
+sub logMsg {
+	my $self = shift @_;
+	my $msg = shift @_;
+	my $meta = shift @_;
+	
+	push @{$self->event_log}, {message=>$msg,meta=>$meta,type=>'status'};
+}
+
 
 1;
