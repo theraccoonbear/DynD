@@ -25,7 +25,6 @@ has 'config_file' => (
 	is => 'rw',
 	isa => 'Str',
 	default => sub {
-		
 		return dirname(abs_path(__FILE__)) . '/config.json';
 	}
 );
@@ -40,7 +39,7 @@ has 'dns' => (
 	is => 'rw',
 	isa => 'ArrayRef',
 	default => sub {
-		my $json = read_file('managed.json');
+		my $json = read_file(dirname(abs_path(__FILE__)) . '/managed.json');
 		return decode_json($json);
 		
 	}
