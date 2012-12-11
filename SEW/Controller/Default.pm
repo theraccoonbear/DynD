@@ -3,13 +3,14 @@ package SEW::Controller::Default;
 use strict;
 use warnings;
 use Moose;
+use CGI;
 
 extends 'SEW::Controller';
 
 has 'exposed' => (
 	is => 'ro',
 	isa => 'ArrayRef',
-	default => sub { return ['test']; }
+	default => sub { return ['test','debug']; }
 );
 
 sub setup {
@@ -29,5 +30,14 @@ sub index {
 	$self->error("Hey!");
 }
 
+sub debug {
+	my $self = shift @_;
+	
+	my $cgi = CGI->new();
+	
+	my $params = $cgi->Vars();
+	$self->error("Debug", $params->{path});
+	
+}
 
 1;
