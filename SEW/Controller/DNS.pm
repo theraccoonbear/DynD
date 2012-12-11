@@ -11,7 +11,7 @@ extends 'SEW::Controller';
 has 'exposed' => (
 	is => 'ro',
 	isa => 'ArrayRef',
-	default => sub { return ['update']; }
+	default => sub { return ['update','getPublicIP']; }
 );
 
 has 'dns' => (
@@ -19,6 +19,13 @@ has 'dns' => (
 	isa => 'DynD',
 	default => sub { return DynD->new(); }
 );
+
+sub getPublicIP {
+	my $self = shift @_;
+	my $ip = $ENV{REMOTE_ADDR};
+	
+	$self->send("Your public IP is: $ip", {ip=>$ip});
+}
 
 
 sub update {
@@ -32,11 +39,16 @@ sub update {
 	
 	if ($self->dns->validPass($base, $subd, $pass)) {
 		my $cur_ip = $self->dns->currentIP($subd . '.' . $base);
-		$self->dns->updateRecord($base, $subd, $cur_ip, $new_ip);
-		if ($self->dns->anyFatals) {
-			$self->error("Update failed", $self->dns->event_log);
+		my $changes = {old_ip=>$cur_ip,new_ip=>$new_ip,domain=>$subd . '.' . $base};
+		if ($cur_ip ne $new_ip) {
+			$self->dns->updateRecord($base, $subd, $cur_ip, $new_ip);
+			if ($self->dns->anyFatals) {
+				$self->error("Update failed", $self->dns->event_log);
+			} else {
+				$self->send("Success!", $changes);
+			}
 		} else {
-			$self->send("Success!",{success=>JSON::XS::true});
+			$self->send("IP is already up to date", $changes);
 		}
 	} else {
 		$self->error('Invalid password');
