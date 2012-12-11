@@ -39,10 +39,8 @@ sub update {
 			$self->send("Success!",{success=>JSON::XS::true});
 		}
 	} else {
-		$self->error('bad pass');
+		$self->error('Invalid password');
 	}
-	
-	#$self->resp->send('Update', {p=>$params});
 }
 
 

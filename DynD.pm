@@ -205,13 +205,13 @@ sub openDomainManager {
 	
 	$self->logMsg("Opening domain manager...");
 	$self->mech->get('https://host414.hostmonster.com:2083/frontend/dm.cgi?step=dm');
-	if ($self->mech->success) {
+	if (!$self->mech->success) {
 		return $self->logFatal("Load error");
 	}
 	$self->logMsg("OK. Loading account...");
 	
 	$self->mech->get('https://my.hostmonster.com/cgi/account/dm?ldomain=theracco');
-	if ($self->mech->success) {
+	if (!$self->mech->success) {
 		return $self->logFatal("Load error");
 	}
 	$self->logMsg("OK. Retrieving current DNS config...");
@@ -225,7 +225,7 @@ sub openDomainManager {
 	
 	$self->mech->post($state_url, $req);
 	
-	if ($self->mech->success) {
+	if (!$self->mech->success) {
 		return $self->logFatal("Load error");
 	}
 	
