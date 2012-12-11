@@ -70,7 +70,7 @@ sub _loadParameters {
 		'posted' => $posted
 	};
 	
-	my $path = $self->q->url_param('path');
+	my $path = $self->q->url_param('path') || '';
 	my $req_path = length($path) > 0 ? $path : 'Default/test';
 	my @path_parts = split(/\//, $req_path);
 	#my @path_parts = split(/\//, $self->q->url_param('path') || '');
