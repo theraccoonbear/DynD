@@ -9,6 +9,9 @@ use strict;
 use warnings;
 use Data::Dumper;
 use SEW::Controller;
+#use CGI qw(-no_debug :standard);
+
+#print "Content-Type: text/plain\n\n"; print Dumper(%ENV);exit;
 
 my $controller = new SEW::Controller();
 

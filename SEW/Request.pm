@@ -27,7 +27,7 @@ has 'controller_name' => (
 has 'action' => (
 	is => 'rw',
 	isa => 'Str',
-	default => 'index'
+	default => 'test'
 );
 
 has 'parameters' => (
@@ -70,7 +70,10 @@ sub _loadParameters {
 		'posted' => $posted
 	};
 	
-	my @path_parts = split(/\//, $self->q->url_param('path') || '');
+	my $path = $self->q->url_param('path');
+	my $req_path = length($path) > 0 ? $path : 'Default/test';
+	my @path_parts = split(/\//, $req_path);
+	#my @path_parts = split(/\//, $self->q->url_param('path') || '');
 	      
 	my $p_cnt = scalar @path_parts;
 	

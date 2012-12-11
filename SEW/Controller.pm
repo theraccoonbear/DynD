@@ -67,9 +67,9 @@ sub init {
 		'posted' => $posted
 	};
 	
-	
-	
-	my @path_parts = split(/\//, $self->req->q->url_param('path') || '');
+	my $path = $self->req->q->url_param('path');
+	my $req_path = length($path) > 0 ? $path : 'Default/test';
+	my @path_parts = split(/\//, $req_path);
 	
 	my $p_cnt = scalar @path_parts;
 	
