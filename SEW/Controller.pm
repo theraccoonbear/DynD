@@ -151,6 +151,7 @@ sub doAction {
 			$self->error("Unexposed action: $action");
 		}
 	} else {
+#	    print "Content-Type: text/plain\n\n"; print Dumper($self);exit;
 		$self->error("Unimplemented action: $action"); #, Dumper($self));
 		#$self->dump($self);
 	}

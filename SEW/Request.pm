@@ -34,9 +34,6 @@ has 'parameters' => (
 	is => 'rw',
 	isa =>'HashRef',
 	builder => '_loadParameters'
-	#default => sub {
-	#	return {named=>{},numerical=>[],posted=>{}};
-	#}
 );
 
 has 'resp' => (
@@ -73,12 +70,6 @@ sub _loadParameters {
 	my $path = substr($ENV{REQUEST_URI}, 1);
 	my $req_path = length($path) > 0 ? $path : 'Default/test';
 	my @path_parts = split(/\//, $req_path);
-
-	
-	#my $path = $self->q->url_param('path') || '';
-	#my $req_path = length($path) > 0 ? $path : 'Default/test';
-	#my @path_parts = split(/\//, $req_path);
-	#my @path_parts = split(/\//, $self->q->url_param('path') || '');
 	      
 	my $p_cnt = scalar @path_parts;
 	
@@ -122,6 +113,10 @@ sub _findController {
 	my $self = shift @_;
 	
 	my $ctl = 'Default';
+
+	my $path = substr($ENV{REQUEST_URI}, 1); #$self->q->param('path');
+	my $req_path = length($path) > 0 ? $path : 'Default/test';
+	my @path_parts = split(/\//, $req_path);
 	
 	$self->dump(%ENV);
 	
@@ -129,7 +124,6 @@ sub _findController {
 	my $req_path = length($path) > 0 ? $path : 'Default/test';
 	my @path_parts = split(/\//, $req_path);
 
-	#my @path_parts = split(/\//, $self->q->url_param('path') || '');
 	
 	if (scalar @path_parts >= 1) {
 		if ($path_parts[0] =~ m/^[A-Za-z][A-Za-z0-9_]*$/gi) {

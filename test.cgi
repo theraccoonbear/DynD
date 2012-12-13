@@ -8,19 +8,9 @@ BEGIN {
 use strict;
 use warnings;
 use Data::Dumper;
-use SEW::Controller;
-#use CGI;
+use CGI;
 
-#my $cgi = new CGI;
-#print "Content-Type: text/plain\n\n"; print $cgi->Dump(); print Dumper(%ENV);exit;
+my $cgi = new CGI;
 
-my $controller = new SEW::Controller();
-
-eval {
-	$controller->dispatch();
-};
-
-if ($@) {
-	$controller->error("Error", $@);
-}
-
+print "Content-Type: text/plain";
+$cgi->dump()
