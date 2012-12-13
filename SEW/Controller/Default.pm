@@ -36,8 +36,7 @@ sub debug {
 	my $cgi = CGI->new();
 	
 	my $params = $cgi->Vars();
-	$self->error("Debug", $params->{path});
-	
+	$self->error("Debug", $params);
 }
 
 1;
