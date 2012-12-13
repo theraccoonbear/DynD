@@ -4,5 +4,5 @@ managed.json
 .htaccess*
 logs/*
 *.shtml
-*~
-#*#
+*\~
+[#]*[#]
